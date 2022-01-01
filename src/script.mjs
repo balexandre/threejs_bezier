@@ -17,28 +17,24 @@ const GRID_IMPAR = 0xff8866;
 // dimensoes
 const CUBO_SIZE = 20 * 2;
 
-const SCREEN_WIDTH = window.innerWidth;
-const SCREEN_HEIGHT = window.innerHeight;
-
 let mouseMoveMesh;
 let renderer, scene, camera, raycaster, pointer, controls;
 let objectosIntercetar = [];
 let objectosApagar = [];
 
-let corBolas = ['#000'];
 let bolas = [];
 let iBolaSelecionada = -1;
-let rectasFinas = [];
+let retasFinas = [];
 
 /**
- * Classe "Palhinha" para representar a curva Bézier 
+ * Classe "Palhinha" para representar a curva Bézier
  */
 class Palhinha extends THREE.Curve {
   constructor(scale = 1) {
     super();
     this.scale = scale;
-	}
-	
+  }
+
   converteBolaParaVector3(bola) {
     return new THREE.Vector3(bola.position.x, bola.position.y, bola.position.z);
   }
@@ -138,7 +134,7 @@ function inicializa() {
   // camera
   camera = new THREE.PerspectiveCamera(
     75,
-    SCREEN_WIDTH / SCREEN_HEIGHT,
+    window.innerWidth / window.innerHeight,
     1,
     1000
   );
@@ -146,7 +142,7 @@ function inicializa() {
   // renderizacao
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+  renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
   // controlos
@@ -159,10 +155,12 @@ function inicializa() {
 
   inicializaBolas();
   reposicionaBolas();
+  visualizadorAjuda();
 
   // eventos
   document.addEventListener("pointermove", onMovimentoPonteiro);
   document.addEventListener("keydown", onTeclaClick);
+  window.addEventListener("resize", onWindowResize);
 }
 
 /**
@@ -194,7 +192,6 @@ function reposicionaBolas() {
     bola.position.z = 0;
   });
 }
-
 
 /**
  * Remove opacidade maxima de todas as bolas
@@ -259,8 +256,8 @@ function desceBola() {
  */
 function rectaFina() {
   // se já existe uma linha desenhada anteriormente, apaga-a
-  if (rectasFinas[iBolaSelecionada] !== undefined) {
-    scene.remove(rectasFinas[iBolaSelecionada]);
+  if (retasFinas[iBolaSelecionada] !== undefined) {
+    scene.remove(retasFinas[iBolaSelecionada]);
   }
 
   // cria uma linha entre z=0 até à posicao z selecionada
@@ -271,26 +268,27 @@ function rectaFina() {
     new THREE.Vector3(bola.position.x, bola.position.y, bola.position.z)
   );
 
-  const rectaFina = new THREE.Line(
+  const retaFina = new THREE.Line(
     new THREE.BufferGeometry().setFromPoints(coordenadas),
     new THREE.LineBasicMaterial({ color: PRETO })
   );
-  rectasFinas[iBolaSelecionada] = rectaFina;
-  scene.add(rectaFina);
-  objectosApagar.push(rectaFina);
+  retasFinas[iBolaSelecionada] = retaFina;
+  scene.add(retaFina);
+  objectosApagar.push(retaFina);
 }
 
 /**
  * Cria a linha Bézier usando a class "Palhinha"
  */
 function criaBezier() {
+  // cor aleatória
   const corPalhinha = Math.floor(Math.random() * 16777215).toString(16);
 
   const path = new Palhinha(1);
   const geometry = new THREE.TubeGeometry(path, 20, 0.25, 8, false);
   const material = new THREE.MeshBasicMaterial({
     color: new THREE.Color("#" + corPalhinha),
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
   });
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
@@ -352,8 +350,8 @@ function onTeclaClick(event) {
  * @param  {MouseEvent} event
  */
 function onMovimentoPonteiro(event) {
-  const x = (event.clientX / SCREEN_WIDTH) * 2 - 1;
-  const y = -(event.clientY / SCREEN_HEIGHT) * 2 + 1;
+  const x = (event.clientX / window.innerWidth) * 2 - 1;
+  const y = -(event.clientY / window.innerHeight) * 2 + 1;
   pointer.set(x, y);
 
   raycaster.setFromCamera(pointer, camera);
@@ -371,13 +369,26 @@ function onMovimentoPonteiro(event) {
   }
 }
 
+/**
+ * re-posiciona o plano e camera para o novo tamanho da janela
+ */
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  console.log("aqui");
+}
+
+/**
+ * mostra o texto informativo
+ */
 function visualizadorAjuda() {
   const alerta = document.querySelector(".alerta");
 
   let html = `Seleccione uma bola com [1 - 4]<br>
 				Posicione a bola com [Espaco]<br>
 				Desenhe a Bézier com [X]`;
-  
+
   if (iBolaSelecionada >= 0) {
     const bola = bolas[iBolaSelecionada];
     const { x, y, z } = bola.position;
@@ -391,7 +402,7 @@ function visualizadorAjuda() {
     alerta.style.borderColor = BOLAS_CORES[iBolaSelecionada];
   } else {
     // cor por defeito
-    alerta.style.borderColor = '#000000';
+    alerta.style.borderColor = "#000000";
   }
 
   document.querySelector(".alerta p").innerHTML = html;
@@ -403,7 +414,6 @@ function visualizadorAjuda() {
 function renderiza() {
   requestAnimationFrame(renderiza);
   controls.update();
-
   renderer.render(scene, camera);
 }
 
