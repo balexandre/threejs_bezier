@@ -9,10 +9,7 @@ const VERMELHO = 0xff0000;
 const AZUL = 0x0000ff;
 const VERDE = 0x00ff00;
 
-const BOLA_AMARELO = 0xffff00;
-const BOLA_VERMELHO = 0xff0000;
-const BOLA_VERDE = 0x00ff00;
-const BOLA_AZUL = 0x0000ff;
+const BOLAS_CORES = ['yellow', 'red', 'green', 'blue'];
 
 const GRID_PAR = 0x9289b4;
 const GRID_IMPAR = 0xff8866;
@@ -25,11 +22,17 @@ const SCREEN_HEIGHT = window.innerHeight;
 
 let mouseMoveMesh;
 let renderer, scene, camera, raycaster, pointer, controls;
-let objects = [];
+let objectosIntercetar = [];
+let objectosApagar = [];
+
+let corBolas = ['#000'];
 let bolas = [];
 let iBolaSelecionada = -1;
 let rectasFinas = [];
 
+/**
+ * Classe "Palhinha" para representar a curva Bézier 
+ */
 class Palhinha extends THREE.Curve {
   constructor(scale = 1) {
     super();
@@ -37,7 +40,7 @@ class Palhinha extends THREE.Curve {
 	}
 	
   converteBolaParaVector3(bola) {
-	return new THREE.Vector3(bola.position.x, bola.position.y, bola.position.z);
+    return new THREE.Vector3(bola.position.x, bola.position.y, bola.position.z);
   }
 
   getPoint(t, optionalTarget = new THREE.Vector3()) {
@@ -86,7 +89,7 @@ function inicializa() {
       square.position.y = y;
       square.position.z = 0;
 
-      objects.push(square);
+      objectosIntercetar.push(square);
       scene.add(square);
     }
   }
@@ -154,7 +157,7 @@ function inicializa() {
   raycaster = new THREE.Raycaster();
   pointer = new THREE.Vector2();
 
-  inicializacaoBolas();
+  inicializaBolas();
   reposicionaBolas();
 
   // eventos
@@ -162,16 +165,18 @@ function inicializa() {
   document.addEventListener("keydown", onTeclaClick);
 }
 
-function inicializacaoBolas() {
-  // initializacao das bolas
-  [BOLA_AMARELO, BOLA_VERMELHO, BOLA_VERDE, BOLA_AZUL].forEach((cor, i) => {
+/**
+ * initializacao das 4 bolas
+ */
+function inicializaBolas() {
+  BOLAS_CORES.forEach((cor, i) => {
     const geometryBola = new THREE.SphereGeometry(0.5, 10, 10);
     const materialBola = new THREE.MeshBasicMaterial({
-      color: cor,
+      color: new THREE.Color(cor),
       transparent: true,
     });
-    const bola = new THREE.Mesh(geometryBola, materialBola);
 
+    const bola = new THREE.Mesh(geometryBola, materialBola);
     bolas[i] = bola;
     scene.add(bola);
   });
@@ -190,12 +195,20 @@ function reposicionaBolas() {
   });
 }
 
+
+/**
+ * Remove opacidade maxima de todas as bolas
+ */
 function deSelecionaBolas() {
   bolas.forEach((bola, i) => {
     bola.material.opacity = 0.4;
   });
 }
 
+/**
+ * Seleciona a bola na "posicao"
+ * @param  {int} posicao Posicao de 0 a 4
+ */
 function selecionaBola(posicao) {
   deSelecionaBolas();
 
@@ -209,6 +222,9 @@ function selecionaBola(posicao) {
   bolas[iBolaSelecionada].material.opacity = 1;
 }
 
+/**
+ * Colaca a bola selecionada na posicao do rato
+ */
 function clicaPixel() {
   const bola = bolas[iBolaSelecionada];
   bola.position.set(
@@ -218,23 +234,36 @@ function clicaPixel() {
   );
 }
 
+/**
+ * Sobe a bola selecionada no eixo Z
+ */
 function sobeBola() {
   if (iBolaSelecionada >= 0) {
     bolas[iBolaSelecionada].position.z += 0.1;
     rectaFina();
   }
 }
+
+/**
+ * Desce a bola selecionada no eixo Z
+ */
 function desceBola() {
   if (iBolaSelecionada >= 0) {
     bolas[iBolaSelecionada].position.z -= 0.1;
     rectaFina();
   }
 }
+
+/**
+ * Cria a linha vertical na bola selecionada no eixo Z
+ */
 function rectaFina() {
+  // se já existe uma linha desenhada anteriormente, apaga-a
   if (rectasFinas[iBolaSelecionada] !== undefined) {
-    scene.remove(rectasFinas[iBolaSelecionada]); // remove linha anterior
+    scene.remove(rectasFinas[iBolaSelecionada]);
   }
 
+  // cria uma linha entre z=0 até à posicao z selecionada
   const bola = bolas[iBolaSelecionada];
   const coordenadas = [];
   coordenadas.push(new THREE.Vector3(bola.position.x, bola.position.y, 0));
@@ -248,19 +277,34 @@ function rectaFina() {
   );
   rectasFinas[iBolaSelecionada] = rectaFina;
   scene.add(rectaFina);
+  objectosApagar.push(rectaFina);
 }
 
+/**
+ * Cria a linha Bézier usando a class "Palhinha"
+ */
 function criaBezier() {
-  const color = Math.floor(Math.random() * 16777215).toString(16);
+  const corPalhinha = Math.floor(Math.random() * 16777215).toString(16);
+
   const path = new Palhinha(1);
   const geometry = new THREE.TubeGeometry(path, 20, 0.25, 8, false);
   const material = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#" + color),
+    color: new THREE.Color("#" + corPalhinha),
+    side: THREE.DoubleSide
   });
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
+  objectosApagar.push(mesh);
 
   deSelecionaBolas();
+}
+
+/**
+ * limpa todos os objectos desenhados pelo utilizador
+ */
+function limpaTela() {
+  objectosApagar.forEach((x) => scene.remove(x));
+  camera.position.set(0, 0, 15);
 }
 
 /**
@@ -268,15 +312,17 @@ function criaBezier() {
  * @param  {ClickEvent} event
  */
 function onTeclaClick(event) {
-  // console.log('key', event.code);
   switch (event.code) {
     case "Backspace": // tecla Apagar
+      limpaTela();
       break;
-    case "Space": // Tecla Espaco
+    case "Space": // tecla Espaco
       clicaPixel();
       break;
     case "KeyX": // tecla X
       criaBezier();
+      deSelecionaBolas();
+      iBolaSelecionada = -1;
       break;
     case "Digit1": // tecla 1
       selecionaBola(0);
@@ -297,6 +343,8 @@ function onTeclaClick(event) {
       desceBola();
       break;
   }
+
+  visualizadorAjuda();
 }
 
 /**
@@ -310,7 +358,7 @@ function onMovimentoPonteiro(event) {
 
   raycaster.setFromCamera(pointer, camera);
 
-  const intersects = raycaster.intersectObjects(objects, false);
+  const intersects = raycaster.intersectObjects(objectosIntercetar, false);
 
   if (intersects.length > 0) {
     const intersect = intersects[0];
@@ -324,9 +372,12 @@ function onMovimentoPonteiro(event) {
 }
 
 function visualizadorAjuda() {
+  const alerta = document.querySelector(".alerta");
+
   let html = `Seleccione uma bola com [1 - 4]<br>
 				Posicione a bola com [Espaco]<br>
 				Desenhe a Bézier com [X]`;
+  
   if (iBolaSelecionada >= 0) {
     const bola = bolas[iBolaSelecionada];
     const { x, y, z } = bola.position;
@@ -334,10 +385,16 @@ function visualizadorAjuda() {
 			bola ${iBolaSelecionada + 1} selecionada<br/>
 			posicao: [${x}, ${y}, ${Math.round(z * 100) / 100}]<br/><br/>
 			posicione com cursor + [Espaco]<br/>
+      suba ou desca a bola com [W/S]<br>
 			desenhe com [X]`;
+
+    alerta.style.borderColor = BOLAS_CORES[iBolaSelecionada];
+  } else {
+    // cor por defeito
+    alerta.style.borderColor = '#000000';
   }
 
-  document.querySelector(".float p").innerHTML = html;
+  document.querySelector(".alerta p").innerHTML = html;
 }
 
 /**
@@ -348,7 +405,6 @@ function renderiza() {
   controls.update();
 
   renderer.render(scene, camera);
-  visualizadorAjuda();
 }
 
 // inicializa & renderiza o scenario inicial
