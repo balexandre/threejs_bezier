@@ -29,3 +29,7 @@ run `npm test` in order to execute them
 as we use threeJs from a CDN, one needs to run the folder as a webserver, or you will get CORS error.
 for that, run in the root folder `npx http-server` and navigate to http://localhost:8080 to see the web page
 or `npm i`and then `npm run dev` aso [Vite](https://vitejs.dev/) can start the application on http://localhost:3000
+
+## Live
+
+the code is published as GitHub page and can be viewed on https://balexandre.github.io/threejs_bezier/
