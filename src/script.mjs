@@ -9,7 +9,7 @@ const VERMELHO = 0xff0000;
 const AZUL = 0x0000ff;
 const VERDE = 0x00ff00;
 
-const BOLAS_CORES = ['yellow', 'red', 'green', 'blue'];
+const BOLAS_CORES = ["yellow", "red", "green", "blue"];
 
 const GRID_PAR = 0x9289b4;
 const GRID_IMPAR = 0xff8866;
@@ -376,7 +376,6 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  console.log("aqui");
 }
 
 /**
