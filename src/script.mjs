@@ -302,6 +302,7 @@ function criaBezier() {
  */
 function limpaTela() {
   objectosApagar.forEach((x) => scene.remove(x));
+  reposicionaBolas();
   camera.position.set(0, 0, 15);
 }
 
