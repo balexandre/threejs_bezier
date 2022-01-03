@@ -62,33 +62,24 @@ function inicializa() {
   scene.background = new THREE.Color(CINZA);
 
   // grelha
-  const grid = new THREE.PlaneGeometry(1, 1, 1, 1);
-  const colorir = {
-    PAR: new THREE.LineBasicMaterial({
-      color: GRID_PAR,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.4,
-    }),
-    IMPAR: new THREE.LineBasicMaterial({
-      color: GRID_IMPAR,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.4,
-    }),
-  };
-  for (let x = -10; x < 10; x += 1) {
-    for (let y = -10; y < 10; y += 1) {
-      const linha = (x + y) % 2 === 0 ? colorir.PAR : colorir.IMPAR;
-      const square = new THREE.Mesh(grid, linha);
-      square.position.x = x;
-      square.position.y = y;
-      square.position.z = 0;
 
-      objectosIntercetar.push(square);
-      scene.add(square);
-    }
-  }
+  // grelha
+  const gridTexture = new THREE.TextureLoader().load("./src/grid.png");
+  gridTexture.wrapS = THREE.RepeatWrapping;
+  gridTexture.wrapT = THREE.RepeatWrapping;
+  gridTexture.repeat.set(20, 20);
+
+  const plan = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 20, 2, 2),
+    new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
+      map: gridTexture,
+      transparent: true,
+      opacity: 0.4,
+    })
+  );
+  objectosIntercetar.push(plan);
+  scene.add(plan);
 
   // linha referencial y
   const coordenadasY = [];
@@ -122,9 +113,9 @@ function inicializa() {
   scene.add(lineZ);
 
   // quadrado apontador
-  const mouseMoveGeo = new THREE.BoxGeometry(1, 1, 0);
+  const mouseMoveGeo = new THREE.SphereGeometry(0.5, 10, 10);
   const mouseMoveMaterial = new THREE.MeshBasicMaterial({
-    color: VERMELHO,
+    color: PRETO,
     opacity: 0.4,
     transparent: true,
   });
