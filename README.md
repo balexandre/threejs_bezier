@@ -13,9 +13,9 @@ a simple project with ThreeJs and the cubic [Bézier curve](https://en.wikipedia
 
 you can draw how many lines you want be keep changing the points and pressing <kbd>X</kbd>
 
-![image](https://user-images.githubusercontent.com/45473/147861376-b9fc7c89-3c2a-4c80-bd84-abfcb5511172.png)
+![initial image](https://user-images.githubusercontent.com/45473/147974427-98e171ce-ec0b-427b-8dcc-133933baa53a.png)
 
-![image](https://user-images.githubusercontent.com/45473/147861386-97bbb91d-e122-4266-956f-e0909c7b141c.png)
+![one curve](https://user-images.githubusercontent.com/45473/147974497-58bb4eb2-74e6-4210-8790-126d92b908f5.png)
 
 
 ### Unit tests
