@@ -317,9 +317,11 @@ function criaBezier() {
  * limpa todos os objectos desenhados pelo utilizador
  */
 function limpaTela() {
+  iBolaSelecionada = -1;
   objectosApagar.forEach((x) => scene.remove(x));
   reposicionaBolas();
   camera.position.set(0, 0, 15);
+  visualizadorAjuda();
 }
 
 /**
