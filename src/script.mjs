@@ -67,10 +67,10 @@ function inicializa() {
   scene.add(planoInvisivel);
 
   // grelha visivel
-  const gridTexture = new THREE.TextureLoader().load("./src/grid.png");
+  const gridTexture = new THREE.TextureLoader().load("./src/checkerboard.png");
   gridTexture.wrapS = THREE.RepeatWrapping;
   gridTexture.wrapT = THREE.RepeatWrapping;
-  gridTexture.repeat.set(20, 20);
+  gridTexture.repeat.set(5, 5);
 
   const plano = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 20),
@@ -78,7 +78,7 @@ function inicializa() {
       side: THREE.DoubleSide,
       map: gridTexture,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.2,
     })
   );
   scene.add(plano);
