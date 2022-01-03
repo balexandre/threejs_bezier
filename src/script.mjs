@@ -62,7 +62,8 @@ function inicializa() {
   // grelha invisivel (para raycaster funcionar em x = 10)
   const planoInvisivel = new THREE.Mesh(
     new THREE.PlaneGeometry(21, 21),
-    new THREE.MeshBasicMaterial({ visible: false }));
+    new THREE.MeshBasicMaterial({ visible: false })
+  );
   objectosIntercetar.push(planoInvisivel);
   scene.add(planoInvisivel);
 
@@ -70,7 +71,7 @@ function inicializa() {
   const gridTexture = new THREE.TextureLoader().load("./src/checkerboard.png");
   gridTexture.wrapS = THREE.RepeatWrapping;
   gridTexture.wrapT = THREE.RepeatWrapping;
-  gridTexture.repeat.set(5, 5);
+  gridTexture.repeat.set(5, 5); // imagem repetida 5 vezes pois o tamanho da grelha é de 20 (image é 4x4)
 
   const plano = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 20),
@@ -114,14 +115,15 @@ function inicializa() {
   );
   scene.add(lineZ);
 
-  // quadrado apontador
-  const mouseMoveGeo = new THREE.SphereGeometry(0.5, 10, 10);
-  const mouseMoveMaterial = new THREE.MeshBasicMaterial({
-    color: PRETO,
-    opacity: 0.4,
-    transparent: true,
-  });
-  mouseMoveMesh = new THREE.Mesh(mouseMoveGeo, mouseMoveMaterial);
+  // ponto apontador
+  mouseMoveMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 10, 10),
+    new THREE.MeshBasicMaterial({
+      color: PRETO,
+      opacity: 0.4,
+      transparent: true,
+    })
+  );
   scene.add(mouseMoveMesh);
 
   // camera
@@ -157,7 +159,7 @@ function inicializa() {
 }
 
 /**
- * initializacao das 4 bolas
+ * initializacao das 4 bolas (cria as mesmas e adiciona à scene)
  */
 function inicializaBolas() {
   BOLAS_CORES.forEach((cor, i) => {
@@ -180,7 +182,7 @@ function reposicionaBolas() {
   deSelecionaBolas();
 
   bolas.forEach((bola, i) => {
-    bola.position.x = -4 + i * 3;
+    bola.position.x = -4 + i * 3; // para cada bola, a posicao x é diferente
     bola.position.y = -3;
     bola.position.z = 0;
   });
@@ -203,7 +205,7 @@ function selecionaBola(posicao) {
   deSelecionaBolas();
 
   if (iBolaSelecionada === posicao) {
-    // deseleciona se clicar de novo
+    // de-seleciona se clicar de novo
     iBolaSelecionada = -1;
     return;
   }
