@@ -71,7 +71,7 @@ function inicializa() {
   const gridTexture = new THREE.TextureLoader().load("./src/checkerboard.png");
   gridTexture.wrapS = THREE.RepeatWrapping;
   gridTexture.wrapT = THREE.RepeatWrapping;
-  gridTexture.repeat.set(5, 5); // imagem repetida 5 vezes pois o tamanho da grelha é de 20 (image é 4x4)
+  gridTexture.repeat.set(5, 5); // repete a textura 5 vezes
 
   const plano = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 20),
@@ -181,10 +181,16 @@ function inicializaBolas() {
 function reposicionaBolas() {
   deSelecionaBolas();
 
+  const posicoesIniciais = [
+    { x: -2, y: 2, z: 0 },
+    { x: 2, y: 2, z: 0 },
+    { x: 2, y: -2, z: 0 },
+    { x: -2, y: -2, z: 0 },
+  ];
+
   bolas.forEach((bola, i) => {
-    bola.position.x = -4 + i * 3; // para cada bola, a posicao x é diferente
-    bola.position.y = -3;
-    bola.position.z = 0;
+    const { x, y, z } = posicoesIniciais[i];
+    bola.position.set(x, y, z);
   });
 }
 
@@ -223,8 +229,15 @@ function clicaPixel() {
     bola.position.set(
       mouseMoveMesh.position.x,
       mouseMoveMesh.position.y,
-      mouseMoveMesh.position.z
+      bola.position.z
     );
+    // apaga linha anterior se existir
+    apagaRetaFinaExistente(iBolaSelecionada);
+
+    if (bola.position.z != 0) {
+      // cria linha fina
+      criaRetaFina(iBolaSelecionada);
+    }
   }
 }
 
@@ -234,7 +247,7 @@ function clicaPixel() {
 function sobeBola() {
   if (iBolaSelecionada >= 0) {
     bolas[iBolaSelecionada].position.z += 0.1;
-    rectaFina();
+    criaRetaFina();
   }
 }
 
@@ -244,17 +257,21 @@ function sobeBola() {
 function desceBola() {
   if (iBolaSelecionada >= 0) {
     bolas[iBolaSelecionada].position.z -= 0.1;
-    rectaFina();
+    criaRetaFina();
   }
+}
+
+function apagaRetaFinaExistente(posicao) {
+  scene.remove(retasFinas[posicao]);
 }
 
 /**
  * Cria a linha vertical na bola selecionada no eixo Z
  */
-function rectaFina() {
+function criaRetaFina() {
   // se já existe uma linha desenhada anteriormente, apaga-a
   if (retasFinas[iBolaSelecionada] !== undefined) {
-    scene.remove(retasFinas[iBolaSelecionada]);
+    apagaRetaFinaExistente(iBolaSelecionada);
   }
 
   // cria uma linha entre z=0 até à posicao z selecionada
