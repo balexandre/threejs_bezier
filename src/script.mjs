@@ -9,6 +9,7 @@ const VERMELHO = 0xff0000;
 const AZUL = 0x0000ff;
 const VERDE = 0x00ff00;
 
+const BOLAS_NOMES = ["Amarela", "Vermelha", "Verde", "Azul"];
 const BOLAS_CORES = ["yellow", "red", "green", "blue"];
 
 const GRID_PAR = 0x9289b4;
@@ -384,7 +385,7 @@ function visualizadorAjuda() {
     const bola = bolas[iBolaSelecionada];
     const { x, y, z } = bola.position;
     html = `
-			bola ${iBolaSelecionada + 1} selecionada<br/>
+			bola ${BOLAS_NOMES[iBolaSelecionada]} selecionada<br/>
 			posicao: [${x}, ${y}, ${Math.round(z * 100) / 100}]<br/><br/>
 			posicione com cursor + [Espaco]<br/>
       suba ou desca a bola com [W/S]<br>
