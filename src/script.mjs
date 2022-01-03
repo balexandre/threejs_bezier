@@ -12,9 +12,6 @@ const VERDE = 0x00ff00;
 const BOLAS_NOMES = ["Amarela", "Vermelha", "Verde", "Azul"];
 const BOLAS_CORES = ["yellow", "red", "green", "blue"];
 
-const GRID_PAR = 0x9289b4;
-const GRID_IMPAR = 0xff8866;
-
 // dimensoes
 const CUBO_SIZE = 20 * 2;
 
@@ -62,16 +59,21 @@ function inicializa() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(CINZA);
 
-  // grelha
+  // grelha invisivel (para raycaster funcionar em x = 10)
+  const planoInvisivel = new THREE.Mesh(
+    new THREE.PlaneGeometry(21, 21),
+    new THREE.MeshBasicMaterial({ visible: false }));
+  objectosIntercetar.push(planoInvisivel);
+  scene.add(planoInvisivel);
 
-  // grelha
+  // grelha visivel
   const gridTexture = new THREE.TextureLoader().load("./src/grid.png");
   gridTexture.wrapS = THREE.RepeatWrapping;
   gridTexture.wrapT = THREE.RepeatWrapping;
   gridTexture.repeat.set(20, 20);
 
-  const plan = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 20, 2, 2),
+  const plano = new THREE.Mesh(
+    new THREE.PlaneGeometry(20, 20),
     new THREE.MeshBasicMaterial({
       side: THREE.DoubleSide,
       map: gridTexture,
@@ -79,8 +81,7 @@ function inicializa() {
       opacity: 0.4,
     })
   );
-  objectosIntercetar.push(plan);
-  scene.add(plan);
+  scene.add(plano);
 
   // linha referencial y
   const coordenadasY = [];
@@ -179,7 +180,7 @@ function reposicionaBolas() {
   deSelecionaBolas();
 
   bolas.forEach((bola, i) => {
-    bola.position.x = -5 + i * 3;
+    bola.position.x = -4 + i * 3;
     bola.position.y = -3;
     bola.position.z = 0;
   });
@@ -216,11 +217,13 @@ function selecionaBola(posicao) {
  */
 function clicaPixel() {
   const bola = bolas[iBolaSelecionada];
-  bola.position.set(
-    mouseMoveMesh.position.x,
-    mouseMoveMesh.position.y,
-    mouseMoveMesh.position.z
-  );
+  if (bola) {
+    bola.position.set(
+      mouseMoveMesh.position.x,
+      mouseMoveMesh.position.y,
+      mouseMoveMesh.position.z
+    );
+  }
 }
 
 /**
@@ -264,7 +267,9 @@ function rectaFina() {
     new THREE.BufferGeometry().setFromPoints(coordenadas),
     new THREE.LineBasicMaterial({ color: PRETO })
   );
-  retasFinas[iBolaSelecionada] = retaFina;
+
+  retasFinas[iBolaSelecionada] = retaFina; // para podermos apagar a linha anterior
+
   scene.add(retaFina);
   objectosApagar.push(retaFina);
 }
